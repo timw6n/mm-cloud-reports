@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+  <head>
+    <title>MultiMutiny Report</title>
+    <link rel="stylesheet" type="text/css" href="https://multimutiny-cloud-reports.appspot.com/static/report.css" />
+    <link rel="stylesheet" type="text/css" href="https://multimutiny-cloud-reports.appspot.com/static/featherlight.min.css" />
+  </head>
+  <body>
+    <div id="page">
+      <h1>MultiMutiny Report</h1>
+      <p>Report generated at {{time}}</p>
+
+      {% if ci_passed is not none %}
+      <h2 class="{{"passed" if ci_passed else "failed"}}">
+        CI BUILD {{"PASSED" if ci_passed else "FAILED"}}
+      </h2>
+      {% endif %}
+
+      <table id="properties-table">
+        <tr>
+          <td># Mutants Created</td>
+          <td>{{total_mutants}}</td>
+        </tr>
+        <tr>
+          <td># Mutants Killed</td>
+          <td>{{killed_mutants}}</td>
+        </tr>
+        <tr>
+          <td>Pessimistic Mutation Score</td>
+          <td>{{percentage_score}}%</td>
+        </tr>
+        {% if ci_threshold is not none %}
+        <tr>
+          <td>CI Threshold</td>
+          <td>{{ci_threshold}}%</td>
+        </tr>
+        {% endif %}
+      </table>
+
+      <table id="summary-table">
+        <tr>
+          <th>Mutant</th>
+          <th>Target</th>
+          <th>Operator</th>
+          <th>Status</th>
+          <th># Tests</th>
+          <th>Time</th>
+        </tr>
+        {% for result in results %}
+        <tr class="{{result.status}}">
+          <td><a href="#" data-featherlight="#m-{{loop.index0}}">{{result.name}}</a></td>
+          <td>{{result.target}}</td>
+          <td>{{result.operator}}</td>
+          <td>{{result.status}}</td>
+          {% if result.tests is not none %}
+          <td>{{result.tests}} (of {{result.total_tests}})</td>
+          {% else %}
+          <td>n/a</td>
+          {% endif %}
+          <td>{{result.time if result.time is not none else "n/a"}}</td>
+        </tr>
+        {% endfor %}
+      </table>
+
+      <div id="mutants">
+        {% for result in results %}
+        <div id="m-{{loop.index0}}" class="mutant">
+          <h2>{{result.name}}</h2>
+          <div class="diff">
+            <p>The diff below shows any changes made to the original file by the mutation operator.</p>
+            <pre>{{diffs[loop.index0]}}</pre>
+            <p>
+              <a href="./original/{{loop.index0}}">View original file</a> |
+              <a href="./mutant/{{loop.index0}}">View mutant file</a>
+            </p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-latest.js"></script>
+    <script src="https://multimutiny-cloud-reports.appspot.com/static/featherlight.min.js" type="text/javascript"></script>
+  </body>
+</html>
